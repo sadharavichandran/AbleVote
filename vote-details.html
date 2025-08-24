@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Vote Details - AbleVote</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-b from-blue-400 to-blue-600 min-h-screen flex items-center justify-center font-sans">
+
+  <div class="bg-white text-blue-700 shadow-2xl rounded-2xl p-10 w-full max-w-md">
+    <h2 class="text-3xl font-bold mb-6 text-center text-blue-800">🗳️ Submit Your Details</h2>
+
+    <p class="mb-4 text-gray-600 text-center">Enter your Aadhar number and upload your Disabled Certificate to proceed.</p>
+
+    <input type="text" id="aadharInput" placeholder="Aadhar Number (12 digits)" 
+           class="w-full mb-4 p-4 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 text-lg" required>
+           
+    <input type="file" id="certificateFile" 
+           class="w-full mb-6 p-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500">
+
+    <button id="submitDetails" 
+            class="w-full bg-blue-700 text-white py-3 rounded-xl font-semibold hover:bg-blue-900 transition transform hover:scale-105">
+      Submit
+    </button>
+  </div>
+
+  <script>
+    document.getElementById("submitDetails").addEventListener("click", () => {
+      const aadhar = document.getElementById("aadharInput").value.trim();
+      const file = document.getElementById("certificateFile").files[0];
+
+      // Validate Aadhar (12 digits)
+      const aadharPattern = /^\d{12}$/;
+      if(!aadharPattern.test(aadhar)){
+        alert("Invalid Aadhar number! Must be 12 digits.");
+        return;
+      }
+
+      // Check if file uploaded
+      if(!file){
+        alert("Please upload your disabled certificate.");
+        return;
+      }
+
+      // Save details to localStorage
+      localStorage.setItem("voteDetails", JSON.stringify({
+        voteId: localStorage.getItem("voteId"),
+        aadhar,
+        certificateFileName: file.name
+      }));
+
+      alert("Details submitted successfully!");
+      // Redirect to thank you page
+      window.location.href = "vote-candidates.html";
+    });
+  </script>
+<!-- Voice Assistant Button -->
+<button id="voiceBtn" 
+  class="fixed bottom-6 right-6 bg-blue-700 text-white p-4 rounded-full shadow-xl hover:bg-blue-900 transition">
+  🎤
+</button>
+
+<script>
+  let isSpeaking = false;
+  let currentUtterance = null;
+
+  function speakText(text) {
+    if (isSpeaking) {
+      // Stop speaking
+      window.speechSynthesis.cancel();
+      isSpeaking = false;
+      currentUtterance = null;
+    } else {
+      // Start speaking
+      currentUtterance = new SpeechSynthesisUtterance(text);
+      currentUtterance.lang = "en-US";
+      currentUtterance.rate = 0.7;
+
+      currentUtterance.onend = () => {
+        isSpeaking = false;
+        currentUtterance = null;
+      };
+
+      window.speechSynthesis.speak(currentUtterance);
+      isSpeaking = true;
+    }
+  }
+
+  document.getElementById("voiceBtn").addEventListener("click", () => {
+    let content = document.body.innerText; // grabs all visible text
+    speakText(content);
+  });
+
+  // --- Optional: Speech Recognition (Commands) ---
+  if ('webkitSpeechRecognition' in window) {
+    const recognition = new webkitSpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = "en-US";
+
+    recognition.onresult = (event) => {
+      let command = event.results[0][0].transcript.toLowerCase();
+      let targetPage = null;
+
+      if (command.includes("home")) targetPage = "./index.html";
+      else if (command.includes("about")) targetPage = "./about.html";
+      else if (command.includes("contact")) targetPage = "./contact.html";
+      else if (command.includes("login")) targetPage = "./login.html";
+      else if (command.includes("signup")) targetPage = "./signup.html";
+
+      if (targetPage) window.location.href = targetPage; // Assistant stays OFF on new page
+    };
+
+    // Long press button to activate voice commands
+    let btn = document.getElementById("voiceBtn");
+    btn.addEventListener("mousedown", () => recognition.start());
+    btn.addEventListener("mouseup", () => recognition.stop());
+    btn.addEventListener("touchstart", () => recognition.start());
+    btn.addEventListener("touchend", () => recognition.stop());
+  }
+</script>
+
+</body>
+</html>

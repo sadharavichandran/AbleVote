@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login - AbleVote</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-b from-blue-600 to-blue-400 text-white font-sans">
+
+  <!-- Navbar -->
+  <header class="p-5 shadow-lg bg-blue-700 bg-opacity-80 fixed w-full z-50">
+    <div class="max-w-6xl mx-auto flex justify-between items-center">
+      <h1 class="text-2xl font-bold">AbleVote</h1>
+      <nav class="space-x-6">
+        <a href="index.html" class="hover:underline">Home</a>
+        <a href="about.html" class="hover:underline">About</a>
+        <a href="contact.html" class="hover:underline">Contact</a>
+        <a href="login.html" class="underline">Login</a>
+        <a href="signup.html" class="hover:underline">Signup</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Login Form -->
+  <section class="h-screen flex items-center justify-center px-6">
+    <div class="bg-white text-blue-700 shadow-xl rounded-xl p-8 w-full max-w-md">
+      <h2 class="text-3xl font-bold mb-6 text-center">🔑 Login</h2>
+      <form>
+        <input type="email" placeholder="Email" class="w-full mb-4 p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-600" required>
+        <input type="password" placeholder="Password" class="w-full mb-4 p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-600" required>
+        <button type="submit" class="w-full bg-blue-700 text-white py-3 rounded-lg font-semibold hover:bg-blue-900 transition">Login</button>
+      </form>
+      <p class="mt-4 text-center text-gray-600">Don’t have an account? <a href="signup.html" class="text-blue-700 font-bold">Signup</a></p>
+      <p class="mt-4 text-center text-gray-600">Go To Admin Page <a href="admin.html" class="text-blue-700 font-bold">AdminPade</a></p>
+      
+    </div>
+  </section>
+
+
+<!-- Voice Assistant Button -->
+<button id="voiceBtn" 
+  class="fixed bottom-6 right-6 bg-blue-700 text-white p-4 rounded-full shadow-xl hover:bg-blue-900 transition">
+  🎤
+</button>
+
+<script>
+  let isSpeaking = false;
+  let currentUtterance = null;
+
+  function speakText(text) {
+    if (isSpeaking) {
+      // Stop speaking
+      window.speechSynthesis.cancel();
+      isSpeaking = false;
+      currentUtterance = null;
+    } else {
+      // Start speaking
+      currentUtterance = new SpeechSynthesisUtterance(text);
+      currentUtterance.lang = "en-US";
+      currentUtterance.rate = 0.7;
+
+      currentUtterance.onend = () => {
+        isSpeaking = false;
+        currentUtterance = null;
+      };
+
+      window.speechSynthesis.speak(currentUtterance);
+      isSpeaking = true;
+    }
+  }
+
+  document.getElementById("voiceBtn").addEventListener("click", () => {
+    let content = document.body.innerText; // grabs all visible text
+    speakText(content);
+  });
+
+  // --- Optional: Speech Recognition (Commands) ---
+  if ('webkitSpeechRecognition' in window) {
+    const recognition = new webkitSpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = "en-US";
+
+    recognition.onresult = (event) => {
+      let command = event.results[0][0].transcript.toLowerCase();
+      let targetPage = null;
+
+      if (command.includes("home")) targetPage = "./index.html";
+      else if (command.includes("about")) targetPage = "./about.html";
+      else if (command.includes("contact")) targetPage = "./contact.html";
+      else if (command.includes("login")) targetPage = "./login.html";
+      else if (command.includes("signup")) targetPage = "./signup.html";
+
+      if (targetPage) window.location.href = targetPage; // Assistant stays OFF on new page
+    };
+
+    // Long press button to activate voice commands
+    let btn = document.getElementById("voiceBtn");
+    btn.addEventListener("mousedown", () => recognition.start());
+    btn.addEventListener("mouseup", () => recognition.stop());
+    btn.addEventListener("touchstart", () => recognition.start());
+    btn.addEventListener("touchend", () => recognition.stop());
+  }
+</script>
+
+<script>
+const loginForm = document.querySelector("form"); // gets your only login form
+
+loginForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+
+  const email = loginForm[0].value.trim().toLowerCase();    // first input
+  const password = loginForm[1].value;                     // second input
+
+  const users = JSON.parse(localStorage.getItem("users") || "[]");
+
+  // Check if user exists
+  const user = users.find(u => u.email === email && u.password === password);
+
+  if(user){
+    // Save logged-in user for dashboard
+    localStorage.setItem("loggedInUser", JSON.stringify(user));
+
+    // Redirect to dashboard
+    window.location.href = "dashboard.html";
+  } else {
+    alert("Invalid email or password!");
+  }
+});
+</script>
+
+</script>
+</body>
+</html>
+
+
+
+

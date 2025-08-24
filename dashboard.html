@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AbleVote Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen font-sans">
+
+  <!-- Navbar -->
+  <nav class="bg-blue-700 text-white p-4 shadow flex justify-between">
+    <h1 class="font-bold text-xl">AbleVote Dashboard</h1>
+    <button id="logoutBtn" class="bg-red-500 px-3 py-1 rounded hover:bg-red-700">Logout</button>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="max-w-3xl mx-auto mt-10 p-6 bg-white rounded-xl shadow-lg">
+    <h2 class="text-2xl font-bold mb-4">Welcome, <span id="userName"></span>!</h2>
+
+    <p class="mb-4">Enter your Vote ID to proceed:</p>
+    <input id="voteNumber" type="text" placeholder="Vote ID (e.g., ABC1234567)" class="w-full p-3 rounded border mb-4">
+
+    <div class="flex space-x-4">
+      <button id="voteBtn" class="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-900">Vote</button>
+      <button id="demoBtn" class="bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-900">Demo</button>
+    </div>
+  </div>
+
+  <script>
+    // Get logged-in user
+    const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser"));
+    
+    if(!loggedInUser){
+      alert("Please login first!");
+      window.location.href = "login.html";
+    } else {
+      document.getElementById("userName").textContent = loggedInUser.name;
+    }
+
+    // Vote button - check Vote ID pattern
+    document.getElementById("voteBtn").addEventListener("click", () => {
+      const voteId = document.getElementById("voteNumber").value.trim();
+
+      // Check if vote ID matches pattern ABC1234567
+      const voteIdPattern = /^[A-Z]{3}\d{7}$/;
+      if(!voteIdPattern.test(voteId)){
+        alert("Invalid Vote ID! Must be like ABC1234567.");
+        return;
+      }
+
+      // Save vote ID to localStorage
+      localStorage.setItem("voteId", voteId);
+
+      // Redirect to Vote Details page
+      window.location.href = "vote-details.html";
+    });
+
+    // Demo button
+    document.getElementById("demoBtn").addEventListener("click", () => {
+      window.location.href = "demo.html";
+    });
+
+    // Logout button
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+      localStorage.removeItem("loggedInUser");
+      window.location.href = "login.html";
+    });
+  </script>
+
+  <!-- Voice Assistant Button -->
+<button id="voiceBtn" 
+  class="fixed bottom-6 right-6 bg-blue-700 text-white p-4 rounded-full shadow-xl hover:bg-blue-900 transition">
+  🎤
+</button>
+
+<script>
+  let isSpeaking = false;
+  let currentUtterance = null;
+
+  function speakText(text) {
+    if (isSpeaking) {
+      // Stop speaking
+      window.speechSynthesis.cancel();
+      isSpeaking = false;
+      currentUtterance = null;
+    } else {
+      // Start speaking
+      currentUtterance = new SpeechSynthesisUtterance(text);
+      currentUtterance.lang = "en-US";
+      currentUtterance.rate = 0.7;
+
+      currentUtterance.onend = () => {
+        isSpeaking = false;
+        currentUtterance = null;
+      };
+
+      window.speechSynthesis.speak(currentUtterance);
+      isSpeaking = true;
+    }
+  }
+
+  document.getElementById("voiceBtn").addEventListener("click", () => {
+    let content = document.body.innerText; // grabs all visible text
+    speakText(content);
+  });
+
+  // --- Optional: Speech Recognition (Commands) ---
+  if ('webkitSpeechRecognition' in window) {
+    const recognition = new webkitSpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = "en-US";
+
+    recognition.onresult = (event) => {
+      let command = event.results[0][0].transcript.toLowerCase();
+      let targetPage = null;
+
+      if (command.includes("home")) targetPage = "./index.html";
+      else if (command.includes("about")) targetPage = "./about.html";
+      else if (command.includes("contact")) targetPage = "./contact.html";
+      else if (command.includes("login")) targetPage = "./login.html";
+      else if (command.includes("signup")) targetPage = "./signup.html";
+
+      if (targetPage) window.location.href = targetPage; // Assistant stays OFF on new page
+    };
+
+    // Long press button to activate voice commands
+    let btn = document.getElementById("voiceBtn");
+    btn.addEventListener("mousedown", () => recognition.start());
+    btn.addEventListener("mouseup", () => recognition.stop());
+    btn.addEventListener("touchstart", () => recognition.start());
+    btn.addEventListener("touchend", () => recognition.stop());
+  }
+</script>
+
+</body>
+</html>

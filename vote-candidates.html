@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Vote - AbleVote</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-b from-blue-400 to-blue-600 min-h-screen flex flex-col items-center justify-center font-sans">
+
+  <div class="bg-white shadow-2xl rounded-2xl p-10 w-full max-w-4xl">
+    <h2 class="text-3xl font-bold mb-8 text-center text-blue-800">🗳️ Choose Your Candidate</h2>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="candidatesList">
+      <!-- Candidates will be added here dynamically -->
+    </div>
+
+    <button id="voteBtn" class="w-full mt-8 bg-blue-700 text-white py-3 rounded-xl font-semibold hover:bg-blue-900 transition transform hover:scale-105">
+      Submit Vote
+    </button>
+  </div>
+
+  <script>
+    // Example candidates with pictures
+    const candidates = [
+      { id: 1, name: "Alice Johnson", img: "https://i.pravatar.cc/150?img=1" },
+      { id: 2, name: "Bob Smith", img: "https://i.pravatar.cc/150?img=2" },
+      { id: 3, name: "Carol Lee", img: "https://i.pravatar.cc/150?img=3" },
+      { id: 4, name: "David Kim", img: "https://i.pravatar.cc/150?img=4" },
+      { id: 5, name: "Eva Green", img: "https://i.pravatar.cc/150?img=5" }
+    ];
+
+    const user = JSON.parse(localStorage.getItem("loggedInUser"));
+    const voteId = localStorage.getItem("voteId");
+
+    if(!user || !voteId){
+      alert("Please login and submit your vote details first!");
+      window.location.href = "login.html";
+    }
+
+    // Check if user already voted
+    const votes = JSON.parse(localStorage.getItem("votes") || "[]");
+    const hasVoted = votes.some(v => v.voteId === voteId);
+
+    if(hasVoted){
+      alert("You have already voted!");
+      window.location.href = "dashboard.html";
+    }
+
+    const candidatesList = document.getElementById("candidatesList");
+
+    // Render candidates with image and radio button
+    candidates.forEach(c => {
+      const div = document.createElement("div");
+      div.className = "bg-gray-100 rounded-xl shadow-lg p-4 flex flex-col items-center hover:shadow-2xl transition cursor-pointer";
+
+      div.innerHTML = `
+        <img src="${c.img}" alt="${c.name}" class="w-32 h-32 rounded-full mb-4 object-cover">
+        <label class="text-lg font-semibold text-center cursor-pointer">
+          <input type="radio" name="candidate" value="${c.id}" class="mr-2">
+          ${c.name}
+        </label>
+      `;
+
+      // Clicking anywhere on card selects the radio
+      div.addEventListener("click", () => {
+        div.querySelector('input[name="candidate"]').checked = true;
+      });
+
+      candidatesList.appendChild(div);
+    });
+
+    // Vote button click
+    document.getElementById("voteBtn").addEventListener("click", () => {
+      const selected = document.querySelector('input[name="candidate"]:checked');
+      if(!selected){
+        alert("Please select a candidate to vote!");
+        return;
+      }
+
+      const confirmVote = confirm(`Are you sure you want to vote for ${candidates.find(c => c.id == selected.value).name}?`);
+      if(!confirmVote) return;
+
+      // Save vote
+      votes.push({
+        voteId: voteId,
+        userEmail: user.email,
+        candidateId: parseInt(selected.value),
+        candidateName: candidates.find(c => c.id == selected.value).name,
+        timestamp: new Date().toISOString()
+      });
+
+      localStorage.setItem("votes", JSON.stringify(votes));
+
+      alert("Your vote has been submitted successfully!");
+      window.location.href = "dashboard.html"; // Redirect to dashboard
+    });
+  </script>
+  <!-- Voice Assistant Button -->
+<button id="voiceBtn" 
+  class="fixed bottom-6 right-6 bg-blue-700 text-white p-4 rounded-full shadow-xl hover:bg-blue-900 transition">
+  🎤
+</button>
+
+<script>
+  let isSpeaking = false;
+  let currentUtterance = null;
+
+  function speakText(text) {
+    if (isSpeaking) {
+      // Stop speaking
+      window.speechSynthesis.cancel();
+      isSpeaking = false;
+      currentUtterance = null;
+    } else {
+      // Start speaking
+      currentUtterance = new SpeechSynthesisUtterance(text);
+      currentUtterance.lang = "en-US";
+      currentUtterance.rate = 0.7;
+
+      currentUtterance.onend = () => {
+        isSpeaking = false;
+        currentUtterance = null;
+      };
+
+      window.speechSynthesis.speak(currentUtterance);
+      isSpeaking = true;
+    }
+  }
+
+  document.getElementById("voiceBtn").addEventListener("click", () => {
+    let content = document.body.innerText; // grabs all visible text
+    speakText(content);
+  });
+
+  // --- Optional: Speech Recognition (Commands) ---
+  if ('webkitSpeechRecognition' in window) {
+    const recognition = new webkitSpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = "en-US";
+
+    recognition.onresult = (event) => {
+      let command = event.results[0][0].transcript.toLowerCase();
+      let targetPage = null;
+
+      if (command.includes("home")) targetPage = "./index.html";
+      else if (command.includes("about")) targetPage = "./about.html";
+      else if (command.includes("contact")) targetPage = "./contact.html";
+      else if (command.includes("login")) targetPage = "./login.html";
+      else if (command.includes("signup")) targetPage = "./signup.html";
+
+      if (targetPage) window.location.href = targetPage; // Assistant stays OFF on new page
+    };
+
+    // Long press button to activate voice commands
+    let btn = document.getElementById("voiceBtn");
+    btn.addEventListener("mousedown", () => recognition.start());
+    btn.addEventListener("mouseup", () => recognition.stop());
+    btn.addEventListener("touchstart", () => recognition.start());
+    btn.addEventListener("touchend", () => recognition.stop());
+  }
+</script>
+
+</body>
+</html>

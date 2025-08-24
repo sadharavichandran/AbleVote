@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Voting Results - Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center font-sans">
+  <div class="bg-white shadow-2xl rounded-2xl p-10 w-full max-w-lg">
+    <h2 class="text-3xl font-bold mb-6 text-center text-blue-800">🗳️ Voting Results</h2>
+    <div id="resultsList" class="space-y-4"></div>
+  </div>
+
+  <script>
+    // Protect admin page
+    if(localStorage.getItem("isAdminLoggedIn") !== "true"){
+      alert("You are not authorized!");
+      window.location.href = "login.html";
+    }
+
+    const votes = JSON.parse(localStorage.getItem("votes") || "[]");
+    const candidates = [
+      { id: 1, name: "Alice Johnson" },
+      { id: 2, name: "Bob Smith" },
+      { id: 3, name: "Carol Lee" },
+      { id: 4, name: "David Kim" },
+      { id: 5, name: "Eva Green" }
+    ];
+
+    const resultsList = document.getElementById("resultsList");
+
+    candidates.forEach(c => {
+      const voteCount = votes.filter(v => v.candidateId === c.id).length;
+      const div = document.createElement("div");
+      div.className = "bg-gray-100 p-4 rounded-lg text-lg font-semibold";
+      div.textContent = `${c.name} : ${voteCount} votes`;
+      resultsList.appendChild(div);
+    });
+  </script>
+</body>
+</html>

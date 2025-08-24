@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Signup - AbleVote</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-b from-blue-600 to-blue-400 text-white font-sans">
+
+  <!-- Navbar -->
+  <header class="p-5 shadow-lg bg-blue-700 bg-opacity-80 fixed w-full z-50">
+    <div class="max-w-6xl mx-auto flex justify-between items-center">
+      <h1 class="text-2xl font-bold">AbleVote</h1>
+      <nav class="space-x-6">
+        <a href="index.html" class="hover:underline">Home</a>
+        <a href="about.html" class="hover:underline">About</a>
+        <a href="contact.html" class="hover:underline">Contact</a>
+        <a href="login.html" class="hover:underline">Login</a>
+        <a href="signup.html" class="underline">Signup</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Signup Form -->
+  <section class="h-screen flex items-center justify-center px-6">
+    <div class="bg-white text-blue-700 shadow-xl rounded-xl p-8 w-full max-w-md">
+      <h2 class="text-3xl font-bold mb-6 text-center">📝 Signup</h2>
+      <form id="signupForm">
+        <input type="text" placeholder="Full Name" class="w-full mb-4 p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-600" required>
+        <input type="email" placeholder="Email" class="w-full mb-4 p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-600" required>
+        <input type="password" placeholder="Password" class="w-full mb-4 p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-600" required>
+        <input type="password" placeholder="Confirm Password" class="w-full mb-4 p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-600" required>
+        <button type="submit" class="w-full bg-blue-700 text-white py-3 rounded-lg font-semibold hover:bg-blue-900 transition">Create Account</button>
+      </form>
+      <p class="mt-4 text-center text-gray-600">Already have an account? <a href="login.html" class="text-blue-700 font-bold">Login</a></p>
+    </div>
+  </section>
+
+  <!-- Voice Assistant Button -->
+<button id="voiceBtn" 
+  class="fixed bottom-6 right-6 bg-blue-700 text-white p-4 rounded-full shadow-xl hover:bg-blue-900 transition">
+  🎤
+</button>
+
+<script>
+  let isSpeaking = false;
+  let currentUtterance = null;
+
+  function speakText(text) {
+    if (isSpeaking) {
+      // Stop speaking
+      window.speechSynthesis.cancel();
+      isSpeaking = false;
+      currentUtterance = null;
+    } else {
+      // Start speaking
+      currentUtterance = new SpeechSynthesisUtterance(text);
+      currentUtterance.lang = "en-US";
+      currentUtterance.rate = 0.7;
+
+      currentUtterance.onend = () => {
+        isSpeaking = false;
+        currentUtterance = null;
+      };
+
+      window.speechSynthesis.speak(currentUtterance);
+      isSpeaking = true;
+    }
+  }
+
+  document.getElementById("voiceBtn").addEventListener("click", () => {
+    let content = document.body.innerText; // grabs all visible text
+    speakText(content);
+  });
+
+  // --- Optional: Speech Recognition (Commands) ---
+  if ('webkitSpeechRecognition' in window) {
+    const recognition = new webkitSpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = "en-US";
+
+    recognition.onresult = (event) => {
+      let command = event.results[0][0].transcript.toLowerCase();
+      let targetPage = null;
+
+      if (command.includes("home")) targetPage = "./index.html";
+      else if (command.includes("about")) targetPage = "./about.html";
+      else if (command.includes("contact")) targetPage = "./contact.html";
+      else if (command.includes("login")) targetPage = "./login.html";
+      else if (command.includes("signup")) targetPage = "./signup.html";
+
+      if (targetPage) window.location.href = targetPage; // Assistant stays OFF on new page
+    };
+
+    // Long press button to activate voice commands
+    let btn = document.getElementById("voiceBtn");
+    btn.addEventListener("mousedown", () => recognition.start());
+    btn.addEventListener("mouseup", () => recognition.stop());
+    btn.addEventListener("touchstart", () => recognition.start());
+    btn.addEventListener("touchend", () => recognition.stop());
+  }
+</script>
+
+
+<script>
+  const signupForm = document.getElementById("signupForm");
+
+signupForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+
+  // Get values from form inputs by index
+  const name = signupForm[0].value.trim();
+  const email = signupForm[1].value.trim().toLowerCase();
+  const password = signupForm[2].value;
+  const confirmPassword = signupForm[3].value;
+
+  // Email format check
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    alert("Invalid email format!");
+    return;
+  }
+
+  // Strong password check: min 8 chars, uppercase, lowercase, number, special char
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
+  if (!passwordRegex.test(password)) {
+    alert("Password must be 8+ chars with uppercase, lowercase, number & special char.");
+    return;
+  }
+
+  // Confirm password check
+  if (password !== confirmPassword) {
+    alert("Passwords do not match!");
+    return;
+  }
+
+  // Get existing users from localStorage
+  const users = JSON.parse(localStorage.getItem("users") || "[]");
+
+  // Check if email already exists
+  if (users.some(user => user.email === email)) {
+    alert("This email is already registered!");
+    return;
+  }
+
+  // Add new user
+  users.push({ name, email, password });
+  localStorage.setItem("users", JSON.stringify(users));
+
+  alert("Signup successful! Redirecting to login page...");
+  window.location.href = "login.html";
+});
+
+</script>
+</body>
+</html>

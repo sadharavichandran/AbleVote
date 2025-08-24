@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AbleVote - Home</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-b from-blue-600 to-blue-400 text-white font-sans">
+
+  <!-- Navbar -->
+  <header class="p-5 shadow-lg bg-blue-700 bg-opacity-80 fixed w-full z-50">
+    <div class="max-w-6xl mx-auto flex justify-between items-center">
+      <h1 class="text-2xl font-bold">AbleVote</h1>
+      <nav class="space-x-6">
+        <a href="index.html" class="hover:underline">Home</a>
+        <a href="about.html" class="hover:underline">About</a>
+        <a href="contact.html" class="hover:underline">Contact</a>
+        <a href="login.html" class="hover:underline">Login</a>
+        <a href="signup.html" class="hover:underline">Signup</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="h-screen flex flex-col justify-center items-center text-center px-6">
+    <h2 class="text-5xl font-bold mb-6 animate-bounce">Every Voice Matters. Every Vote Counts.</h2>
+    <p class="text-lg max-w-2xl mb-8">
+      AbleVote is here to break barriers and ensure that people with disabilities can vote with ease, 
+      independence, and dignity.
+    </p>
+    <div class="space-x-4">
+      <a href="#" class="bg-white text-blue-700 px-6 py-3 rounded-full font-semibold shadow-md hover:scale-105 transition">🔍 Find Accessible Polling Place</a>
+      <a href="#" class="bg-blue-900 text-white px-6 py-3 rounded-full font-semibold shadow-md hover:scale-105 transition">📝 Learn How to Vote</a>
+      <a href="#" class="bg-white text-blue-700 px-6 py-3 rounded-full font-semibold shadow-md hover:scale-105 transition">📅 Get Election Reminders</a>
+    </div>
+  </section>
+
+  <!-- Highlights -->
+  <section class="max-w-6xl mx-auto py-16 px-6 grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div class="bg-white text-blue-700 p-6 rounded-xl shadow-lg hover:scale-105 transition">
+      ✔ Find accessible polling locations near you
+    </div>
+    <div class="bg-white text-blue-700 p-6 rounded-xl shadow-lg hover:scale-105 transition">
+      ✔ Learn how to register and prepare for elections
+    </div>
+    <div class="bg-white text-blue-700 p-6 rounded-xl shadow-lg hover:scale-105 transition">
+      ✔ Get election reminders and step-by-step guides
+    </div>
+    <div class="bg-white text-blue-700 p-6 rounded-xl shadow-lg hover:scale-105 transition">
+      ✔ Report and improve accessibility in your community
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-blue-900 text-center py-6">
+    <p>&copy; 2025 AbleVote. All Rights Reserved.</p>
+  </footer>
+
+   
+
+<!-- Voice Assistant Button -->
+<button id="voiceBtn" 
+  class="fixed bottom-6 right-6 bg-blue-700 text-white p-4 rounded-full shadow-xl hover:bg-blue-900 transition">
+  🎤
+</button>
+
+<script>
+  let isSpeaking = false;
+  let currentUtterance = null;
+
+  function speakText(text) {
+    if (isSpeaking) {
+      // Stop speaking
+      window.speechSynthesis.cancel();
+      isSpeaking = false;
+      currentUtterance = null;
+    } else {
+      // Start speaking
+      currentUtterance = new SpeechSynthesisUtterance(text);
+      currentUtterance.lang = "en-US";
+      currentUtterance.rate = 0.7;
+
+      currentUtterance.onend = () => {
+        isSpeaking = false;
+        currentUtterance = null;
+      };
+
+      window.speechSynthesis.speak(currentUtterance);
+      isSpeaking = true;
+    }
+  }
+
+  document.getElementById("voiceBtn").addEventListener("click", () => {
+    let content = document.body.innerText; // grabs all visible text
+    speakText(content);
+  });
+
+  // --- Optional: Speech Recognition (Commands) ---
+  if ('webkitSpeechRecognition' in window) {
+    const recognition = new webkitSpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = "en-US";
+
+    recognition.onresult = (event) => {
+      let command = event.results[0][0].transcript.toLowerCase();
+      let targetPage = null;
+
+      if (command.includes("home")) targetPage = "./index.html";
+      else if (command.includes("about")) targetPage = "./about.html";
+      else if (command.includes("contact")) targetPage = "./contact.html";
+      else if (command.includes("login")) targetPage = "./login.html";
+      else if (command.includes("signup")) targetPage = "./signup.html";
+
+      if (targetPage) window.location.href = targetPage; // Assistant stays OFF on new page
+    };
+
+    // Long press button to activate voice commands
+    let btn = document.getElementById("voiceBtn");
+    btn.addEventListener("mousedown", () => recognition.start());
+    btn.addEventListener("mouseup", () => recognition.stop());
+    btn.addEventListener("touchstart", () => recognition.start());
+    btn.addEventListener("touchend", () => recognition.stop());
+  }
+</script>
+
+</body>
+</html>
+
+

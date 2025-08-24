@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>About Us - AbleVote</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-b from-blue-50 to-white font-sans">
+
+  <!-- Header -->
+  <header class="bg-blue-700 text-white p-5 shadow-lg">
+    <div class="max-w-6xl mx-auto flex justify-between items-center">
+      <h1 class="text-2xl font-bold">AbleVote</h1>
+      <nav>
+        <a href="index.html" class="px-3 hover:underline">Home</a>
+        <a href="about.html" class="px-3 font-semibold underline">About</a>
+        <a href="contact.html" class="px-3 hover:underline">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="max-w-5xl mx-auto px-6 py-12">
+    
+    <!-- Who We Are -->
+    <section class="mb-12 text-center">
+      <h2 class="text-4xl font-bold text-blue-700 mb-4">ℹ️ Who We Are</h2>
+      <p class="text-lg text-gray-700 leading-relaxed">
+        AbleVote is a mission-driven initiative dedicated to making democracy accessible to everyone. 
+        We believe that voting is not just a right, but a powerful way to create change — and no one should be left out because of barriers.
+      </p>
+    </section>
+
+    <!-- Mission -->
+    <section class="mb-12 bg-white shadow-md rounded-xl p-8 text-center">
+      <h2 class="text-3xl font-bold text-blue-600 mb-4">🎯 Our Mission</h2>
+      <p class="text-lg text-gray-700">
+        To empower people with disabilities by providing tools, resources, and guidance 
+        that make voting easy, accessible, and inclusive.
+      </p>
+    </section>
+
+    <!-- Vision -->
+    <section class="mb-12 bg-blue-50 rounded-xl p-8 text-center">
+      <h2 class="text-3xl font-bold text-blue-700 mb-4">👀 Our Vision</h2>
+      <p class="text-lg text-gray-800">
+        A world where every citizen, regardless of ability, can fully and confidently participate in elections.
+      </p>
+    </section>
+
+    <!-- Values -->
+    <section>
+      <h2 class="text-3xl font-bold text-blue-700 mb-8 text-center">💡 Our Values</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        <div class="bg-white shadow-lg rounded-xl p-6 hover:scale-105 transform transition">
+          <h3 class="text-xl font-semibold mb-2">💙 Inclusion</h3>
+          <p class="text-gray-700">Everyone deserves equal access.</p>
+        </div>
+
+        <div class="bg-white shadow-lg rounded-xl p-6 hover:scale-105 transform transition">
+          <h3 class="text-xl font-semibold mb-2">💪 Empowerment</h3>
+          <p class="text-gray-700">Supporting independence in the voting process.</p>
+        </div>
+
+        <div class="bg-white shadow-lg rounded-xl p-6 hover:scale-105 transform transition">
+          <h3 class="text-xl font-semibold mb-2">🔍 Transparency</h3>
+          <p class="text-gray-700">Clear and trustworthy information.</p>
+        </div>
+
+        <div class="bg-white shadow-lg rounded-xl p-6 hover:scale-105 transform transition">
+          <h3 class="text-xl font-semibold mb-2">📢 Advocacy</h3>
+          <p class="text-gray-700">Driving positive change in election accessibility.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+<!-- Voice Assistant Button -->
+<button id="voiceBtn" 
+  class="fixed bottom-6 right-6 bg-blue-700 text-white p-4 rounded-full shadow-xl hover:bg-blue-900 transition">
+  🎤
+</button>
+
+<script>
+  let isSpeaking = false;
+  let currentUtterance = null;
+
+  function speakText(text) {
+    if (isSpeaking) {
+      // Stop speaking
+      window.speechSynthesis.cancel();
+      isSpeaking = false;
+      currentUtterance = null;
+    } else {
+      // Start speaking
+      currentUtterance = new SpeechSynthesisUtterance(text);
+      currentUtterance.lang = "en-US";
+      currentUtterance.rate = 0.7;
+
+      currentUtterance.onend = () => {
+        isSpeaking = false;
+        currentUtterance = null;
+      };
+
+      window.speechSynthesis.speak(currentUtterance);
+      isSpeaking = true;
+    }
+  }
+
+  document.getElementById("voiceBtn").addEventListener("click", () => {
+    let content = document.body.innerText; // grabs all visible text
+    speakText(content);
+  });
+
+  // --- Optional: Speech Recognition (Commands) ---
+  if ('webkitSpeechRecognition' in window) {
+    const recognition = new webkitSpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = "en-US";
+
+    recognition.onresult = (event) => {
+      let command = event.results[0][0].transcript.toLowerCase();
+      let targetPage = null;
+
+      if (command.includes("home")) targetPage = "./index.html";
+      else if (command.includes("about")) targetPage = "./about.html";
+      else if (command.includes("contact")) targetPage = "./contact.html";
+      else if (command.includes("login")) targetPage = "./login.html";
+      else if (command.includes("signup")) targetPage = "./signup.html";
+
+      if (targetPage) window.location.href = targetPage; // Assistant stays OFF on new page
+    };
+
+    // Long press button to activate voice commands
+    let btn = document.getElementById("voiceBtn");
+    btn.addEventListener("mousedown", () => recognition.start());
+    btn.addEventListener("mouseup", () => recognition.stop());
+    btn.addEventListener("touchstart", () => recognition.start());
+    btn.addEventListener("touchend", () => recognition.stop());
+  }
+</script>
+
+
+</body>
+</html>

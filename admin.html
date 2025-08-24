@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Login - AbleVote</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen font-sans">
+  <form id="adminLogin" class="max-w-sm mx-auto bg-white p-8 rounded-xl shadow-xl">
+    <h2 class="text-2xl font-bold mb-4 text-center">Admin Login</h2>
+    <input type="text" id="adminUsername" placeholder="Username" class="w-full mb-4 p-3 rounded border">
+    <input type="password" id="adminPassword" placeholder="Password" class="w-full mb-4 p-3 rounded border">
+    <button type="submit" class="w-full bg-blue-700 text-white py-3 rounded hover:bg-blue-900">Login</button>
+  </form>
+
+  <script>
+    const adminUser = { username: "sadha", password: "sadha123" }; // change as needed
+
+    document.getElementById("adminLogin").addEventListener("submit", e => {
+      e.preventDefault();
+      const username = document.getElementById("adminUsername").value;
+      const password = document.getElementById("adminPassword").value;
+
+      if(username === adminUser.username && password === adminUser.password){
+        localStorage.setItem("isAdminLoggedIn", "true");
+        window.location.href = "admin-results.html";
+      } else {
+        alert("Invalid admin credentials!");
+      }
+    });
+  </script>
+</body>
+</html>
